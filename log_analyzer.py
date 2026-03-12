@@ -1,18 +1,23 @@
-ip_count = {}
+failed_attempts = {}
 
 with open ("access.log") as file:
     for line in file:
-        ip = line.split()[0]
+        parts = line.split()
 
-        if ip in ip_count:
-            ip_count[ip] += 1
-        else:
-            ip_count[ip] = 1
+        ip = parts[0]
+        status = parts[1]
 
-print("IP Activity Summary:\n")
+        if status == "login_failed":
 
-for ip, count in ip_count.items():
-    print(ip, "->", count, "attempts")
+            if ip in failed_attempts: failed_attempts[ip] += 1
+            else:
+                failed_attempts[ip] = 1
+
+print("\nFailed Login Summary:\n")
+
+for ip, count in failed_attempts.items():
+
+    print(ip, "->", count, "failed attempts")
 
     if count >= 3:
-        print("Suspicious activity detected from:", ip)
+        print("Possible brute force attack from:", ip)
