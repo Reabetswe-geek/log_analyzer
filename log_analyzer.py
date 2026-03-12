@@ -1,23 +1,31 @@
-failed_attempts = {}
+log_file = "access.log"
 
-with open ("access.log") as file:
+ip_count ={}
+failed_login = {}
+
+with open(log_file, "r") as file:
     for line in file:
         parts = line.split()
 
+
         ip = parts[0]
-        status = parts[1]
 
-        if status == "login_failed":
+        ip_count[ip] = ip_count.get(ip, 0) + 1
 
-            if ip in failed_attempts: failed_attempts[ip] += 1
-            else:
-                failed_attempts[ip] = 1
+        if "Failed" in line:
+            failed_logins[ip] = failed_logins.get(ip, 0) + 1
 
-print("\nFailed Login Summary:\n")
+print("IP Activity count: ")
+for ip, count in ip_count.items():
+    print(ip, count)
 
-for ip, count in failed_attempts.items():
+print("\nFailed login Attempts: ")
+for ip, count in failed_login.items():
+    print(ip, count)
 
-    print(ip, "->", count, "failed attempts")
+with open("suspicious_ips.txt", "w") as report:
+    for ip, count in failed_login.items():
+        if count >= 3:
+            report.write(f"{ip} - {count} failed login attempts\n")
 
-    if count >= 3:
-        print("Possible brute force attack from:", ip)
+print("\nSuspicious IP report saved to suspicious_ips.txt")
